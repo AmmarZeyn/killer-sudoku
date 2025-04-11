@@ -39,11 +39,33 @@ This project is set up for easy deployment to GitHub Pages:
 5. The site will automatically deploy when you push to the main branch
 6. Access your site at `https://yourusername.github.io/repository-name/`
 
-You can also test the GitHub Pages build locally using:
+### Deployment Scripts
 
-```bash
-./build-github.sh
-```
+This project includes several helpful scripts for GitHub deployment:
+
+- **build-github.sh**: Builds the app for GitHub Pages, with proper base paths and routing.
+  ```bash
+  ./build-github.sh
+  ```
+
+- **github-deploy.sh**: Interactive script that handles the common deployment workflow:
+  - Checks for GitHub remote and helps set it up if missing
+  - Builds the project for GitHub Pages
+  - Commits changes with custom message
+  - Optionally pushes to GitHub
+  ```bash
+  ./github-deploy.sh
+  ```
+
+### SPA Routing on GitHub Pages
+
+This application includes special fixes for Single Page Application (SPA) routing on GitHub Pages:
+
+- A 404.html page that redirects back to the application with the correct route
+- Special scripts that manage URL parameters during redirects
+- Service worker for improved performance and offline capability
+
+These features ensure the app works correctly even when users refresh the page or access direct URLs.
 
 ## How to Use
 
