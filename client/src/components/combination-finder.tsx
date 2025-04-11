@@ -60,16 +60,15 @@ export default function CombinationFinder() {
   const getCombinations = (total: number, cells: number, available: number[], start = 0, current: number[] = [], all: number[][] = []): number[][] => {
     if (cells === 0 && total === 0) {
       all.push([...current]);
-      return;
+    } else if (cells !== 0 && total >= 0) {
+      for (let i = start; i < available.length; i++) {
+        const num = available[i];
+        current.push(num);
+        getCombinations(total - num, cells - 1, available, i + 1, current, all);
+        current.pop();
+      }
     }
-    if (cells === 0 || total < 0) return;
-
-    for (let i = start; i < available.length; i++) {
-      const num = available[i];
-      current.push(num);
-      getCombinations(total - num, cells - 1, available, i + 1, current, all);
-      current.pop();
-    }
+    
     return all;
   };
   
