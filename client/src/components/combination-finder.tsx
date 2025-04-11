@@ -57,7 +57,7 @@ export default function CombinationFinder() {
     }
   };
 
-  const getCombinations = (total, cells, available, start = 0, current = [], all = []) => {
+  const getCombinations = (total: number, cells: number, available: number[], start = 0, current: number[] = [], all: number[][] = []): number[][] => {
     if (cells === 0 && total === 0) {
       all.push([...current]);
       return;
@@ -143,7 +143,7 @@ export default function CombinationFinder() {
             <p className="text-xs text-slate-500 mt-1">Digits already used in row, column or box (comma-separated)</p>
           </div>
           
-          <div className="flex items-end h-full">
+          <div className="mt-8">
             <Button 
               onClick={findCombinations}
               className="w-full transition flex items-center justify-center"

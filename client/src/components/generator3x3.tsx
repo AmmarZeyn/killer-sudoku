@@ -9,7 +9,7 @@ export default function Generator3x3() {
   const [input, setInput] = useState("");
   const [results, setResults] = useState<Array<{sum: number, cells: number, combinations: number[][]}>>([]); 
   const [error, setError] = useState("");
-  const [finalCombos, setFinalCombos] = useState<any[]>([]);
+  const [finalCombos, setFinalCombos] = useState<number[][][]>([]);
 
   const handleCalculate = () => {
     setError("");
@@ -66,7 +66,17 @@ export default function Generator3x3() {
 
   const getCombinations = (total: number, cells: number, start = 1, current: number[] = [], all: number[][] = []) => {
     if (cells === 0 && total === 0) {
-      all.push([...current]);
+      // Sort the current combination to ensure [3,2] is treated the same as [2,3]
+      const sortedCombination = [...current].sort((a, b) => a - b);
+      // Check if this combination (in sorted form) is already in the results
+      const alreadyExists = all.some(combo => 
+        combo.length === sortedCombination.length && 
+        combo.every((val, idx) => val === sortedCombination[idx])
+      );
+      
+      if (!alreadyExists) {
+        all.push(sortedCombination);
+      }
       return all;
     }
     if (cells === 0 || total < 0) return all;
@@ -74,7 +84,7 @@ export default function Generator3x3() {
     for (let i = start; i <= 9; i++) {
       if (!current.includes(i)) {
         current.push(i);
-        getCombinations(total - i, cells - 1, start, current, all);
+        getCombinations(total - i, cells - 1, i + 1, current, all);  // Changed 'start' to 'i + 1' to fix recursion
         current.pop();
       }
     }
@@ -190,7 +200,7 @@ export default function Generator3x3() {
                   {/* Create a 3x3 grid visualization */}
                   {Array.from({ length: 9 }).map((_, i) => {
                     // Find which cage this cell belongs to
-                    const cageIndex = group.findIndex(cage => 
+                    const cageIndex = group.findIndex((cage: number[]) => 
                       cage.includes(i + 1)
                     );
                     
@@ -205,7 +215,7 @@ export default function Generator3x3() {
                   })}
                 </div>
                 <div className="text-xs text-slate-500 space-y-1">
-                  {group.map((cage, i) => (
+                  {group.map((cage: number[], i: number) => (
                     <div key={i}>
                       <span className={`inline-block w-3 h-3 ${cageColors[i % cageColors.length]} mr-1`}></span>
                       {results[i]?.sum}: [{cage.join(', ')}]
