@@ -28,6 +28,23 @@ A web-based Killer Sudoku Helper with tools for finding valid cage combinations 
 3. Start the development server: `npm run dev`
 4. Open your browser to the local development URL
 
+## Deploying to GitHub Pages
+
+This project is set up for easy deployment to GitHub Pages:
+
+1. Fork or push this repository to your GitHub account
+2. Make sure your repository is public
+3. Go to Settings > Pages
+4. Choose "GitHub Actions" as the source
+5. The site will automatically deploy when you push to the main branch
+6. Access your site at `https://yourusername.github.io/repository-name/`
+
+You can also test the GitHub Pages build locally using:
+
+```bash
+./build-github.sh
+```
+
 ## How to Use
 
 ### Combination Finder
@@ -41,3 +58,24 @@ A web-based Killer Sudoku Helper with tools for finding valid cage combinations 
 2. Add all cages that make up the 3×3 grid
 3. Ensure all cages add up to 45 (sum of digits 1-9)
 4. Click "Calculate Valid Combinations" to see possible ways to arrange the digits
+
+## Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+### Feature Ideas
+- Implement a full Killer Sudoku solver
+- Add a visual grid editor for 3×3 Generator
+- Create a printable Killer Sudoku generator
+- Add support for different grid sizes (4×4, 6×6, etc.)
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
