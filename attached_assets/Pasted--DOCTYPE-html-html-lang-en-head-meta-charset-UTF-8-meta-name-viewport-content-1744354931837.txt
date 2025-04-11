@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Killer Sudoku Helper</title>
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    .p-6 {
+      padding: 1.5rem;
+    }
+    .max-w-4xl {
+      max-width: 64rem;
+    }
+    .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .space-y-6 > * + * {
+      margin-top: 1.5rem;
+    }
+    .text-3xl {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+    .font-bold {
+      font-weight: 700;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .flex {
+      display: flex;
+    }
+    .justify-center {
+      justify-content: center;
+    }
+    .space-x-4 > * + * {
+      margin-left: 1rem;
+    }
+    .px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .rounded {
+      border-radius: 0.25rem;
+    }
+    .bg-blue-600 {
+      background-color: #2563eb;
+    }
+    .text-white {
+      color: #ffffff;
+    }
+    .bg-gray-200 {
+      background-color: #e5e7eb;
+    }
+    .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+    .text-xl {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+    .font-semibold {
+      font-weight: 600;
+    }
+    .w-full {
+      width: 100%;
+    }
+    .p-2 {
+      padding: 0.5rem;
+    }
+    .border {
+      border-width: 1px;
+      border-color: #d1d5db;
+    }
+    .text-red-600 {
+      color: #dc2626;
+    }
+    .bg-gray-100 {
+      background-color: #f3f4f6;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    .text-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+    .text-muted-foreground {
+      color: #6b7280;
+    }
+    .h-32 {
+      height: 8rem;
+    }
+    .grid {
+      display: grid;
+    }
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    .mt-6 {
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function SudokuHelper() {
+      const [activeTab, setActiveTab] = useState("finder"); // 'finder' or 'generator'
+
+      return (
+        <div className="p-6 max-w-4xl mx-auto space-y-6">
+          {/* Header */}
+          <h1 className="text-3xl font-bold text-center">Killer Sudoku Helper</h1>
+
+          {/* Tabs */}
+          <div className="flex justify-center space-x-4">
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === "finder" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => setActiveTab("finder")}
+            >
+              Combination Finder
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === "generator" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => setActiveTab("generator")}
+            >
+              3x3 Generator
+            </button>
+          </div>
+
+          {/* Content */}
+          {activeTab === "finder" && <CombinationFinder />}
+          {activeTab === "generator" && <Generator3x3 />}
+        </div>
+      );
+    }
+
+    // Combination Finder Component
+    function CombinationFinder() {
+      const [cageSum, setCageSum] = useState("");
+      const [numCells, setNumCells] = useState("");
+      const [excludedDigits, setExcludedDigits] = useState("");
+      const [results, setResults] = useState("");
+      const [error, setError] = useState("");
+
+      const findCombinations = () => {
+        setError("");
+        setResults("");
+        const targetSum = parseInt(cageSum);
+        const cells = parseInt(numCells);
+
+        if (isNaN(targetSum) || isNaN(cells) || targetSum < 1 || cells < 1 || cells > 9) {
+          setError("Please enter valid numbers for Sum and Number of Cells.");
+          return;
+        }
+
+        const excludedSet = new Set();
+        if (excludedDigits) {
+          const excludedArray = excludedDigits.split(",").map((s) => s.trim());
+          for (const item of excludedArray) {
+            const digit = parseInt(item);
+            if (!isNaN(digit) && digit >= 1 && digit <= 9) {
+              excludedSet.add(digit);
+            } else {
+              setError(`Invalid excluded digit: "${item}". Use digits 1-9.`);
+              return;
+            }
+          }
+        }
+
+        const availableDigits = Array.from({ length: 9 }, (_, i) => i + 1).filter(
+          (digit) => !excludedSet.has(digit)
+        );
+
+        if (availableDigits.length < cells) {
+          setError(`Not enough available digits (${availableDigits.length}) for ${cells} cells.`);
+          return;
+        }
+
+        const combinations = getCombinations(targetSum, cells, availableDigits);
+        if (combinations.length === 0) {
+          setResults("No valid combinations found.");
+        } else {
+          setResults(
+            `Found ${combinations.length} combination(s):\n${combinations
+              .map((combo) => `[${combo.join(", ")}]`)
+              .join("\n")}`
+          );
+        }
+      };
+
+      const getCombinations = (total, cells, available, start = 0, current = [], all = []) => {
+        if (cells === 0 && total === 0) {
+          all.push([...current]);
+          return;
+        }
+        if (cells === 0 || total < 0) return;
+
+        for (let i = start; i < available.length; i++) {
+          const num = available[i];
+          current.push(num);
+          getCombinations(total - num, cells - 1, available, i + 1, current, all);
+          current.pop();
+        }
+        return all;
+      };
+
+      return (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Combination Finder</h2>
+          <div>
+            <label>Cage Sum:</label>
+            <input
+              type="number"
+              value={cageSum}
+              onChange={(e) => setCageSum(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label>Number of Cells in Cage:</label>
+            <input
+              type="number"
+              value={numCells}
+              onChange={(e) => setNumCells(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label>Excluded Digits (comma-separated):</label>
+            <input
+              type="text"
+              value={excludedDigits}
+              onChange={(e) => setExcludedDigits(e.target.value)}
+              placeholder="e.g., 1,8,9"
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <button onClick={findCombinations} className="px-4 py-2 bg-blue-600 text-white rounded">
+            Find Possible Combinations
+          </button>
+          {error && <p className="text-red-600">{error}</p>}
+          {results && <pre className="bg-gray-100 p-4 rounded">{results}</pre>}
+        </div>
+      );
+    }
+
+    // 3x3 Generator Component
+    function Generator3x3() {
+      const [input, setInput] = useState("");
+      const [results, setResults] = useState([]);
+      const [error, setError] = useState("");
+      const [finalCombos, setFinalCombos] = useState([]);
+
+      const handleCalculate = () => {
+        setError("");
+        setFinalCombos([]);
+        const lines = input.split("\n").map((line) => line.trim()).filter(Boolean);
+        const cages = lines.map((line) => {
+          const [sum, cells] = line.split(",").map(Number);
+          return { sum, cells };
+        });
+        const totalSum = cages.reduce((acc, cage) => acc + cage.sum, 0);
+        if (totalSum !== 45) {
+          setError(`❌ مجموع الأقفاص هو ${totalSum} وليس 45`);
+          return;
+        }
+        const cageCombos = cages.map(({ sum, cells }) => getCombinations(sum, cells));
+        const allValid3x3 = combineCages(cageCombos);
+        setResults(cages.map((c, i) => ({ ...c, combinations: cageCombos[i] })));
+        setFinalCombos(allValid3x3);
+      };
+
+      const getCombinations = (total, cells, start = 1, current = [], all = []) => {
+        if (cells === 0 && total === 0) {
+          all.push([...current]);
+          return;
+        }
+        if (cells === 0 || total < 0) return;
+
+        for (let i = start; i <= 9; i++) {
+          if (!current.includes(i)) {
+            current.push(i);
+            getCombinations(total - i, cells - 1, i + 1, current, all);
+            current.pop();
+          }
+        }
+        return all;
+      };
+
+      const combineCages = (cageCombos, index = 0, current = [], results = []) => {
+        if (index === cageCombos.length) {
+          if (current.flat().length === 9) results.push(current.map((c) => [...c]));
+          return;
+        }
+        for (const combo of cageCombos[index]) {
+          if (combo.every((n) => !current.flat().includes(n))) {
+            current.push(combo);
+            combineCages(cageCombos, index + 1, current, results);
+            current.pop();
+          }
+        }
+        return results;
+      };
+
+      return (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">3x3 Generator</h2>
+          <p className="text-sm text-muted-foreground text-center">
+            Enter cages in the format: <code>(sum),(cell number)</code> — one per line
+          </p>
+          <textarea
+            className="w-full border rounded p-2 h-32 text-sm"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button onClick={handleCalculate} className="px-4 py-2 bg-blue-600 text-white rounded">
+            Calculate Combinations
+          </button>
+          {error && <p className="text-red-600 font-medium">{error}</p>}
+          {results.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Cage Details:</h2>
+              {results.map(({ sum, cells, combinations }, index) => (
+                <div key={index} className="p-4 bg-gray-100 rounded">
+                  <p className="font-medium">
+                    {sum} in {cells} cell(s): {combinations.length} combination(s)
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          {finalCombos.length > 0 && (
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold mt-6">💡 Possible 3x3 Combinations ({finalCombos.length})</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                {finalCombos.map((group, idx) => (
+                  <div key={idx} className="p-2 bg-gray-100 rounded">
+                    {group.map((cage, i) => (
+                      <div key={i} className="text-gray-700">
+                        {cage.join(", ")}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<SudokuHelper />, document.getElementById('root'));
+  </script>
+</body>
+</html>
